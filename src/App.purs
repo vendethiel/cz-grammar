@@ -17,16 +17,16 @@ instance showGender :: Show Gender where
   show Feminine = "Feminine"
   show Neuter = "Neuter"
 
-data ApplyWhere = AlwaysTrue | Except String -- TODO differentiate between "true always except X" or "only some cases"
+data ApplyWhere = AlwaysTrue | ExceptWhen String | OnlyWhen String
 data Rule = Rule String ApplyWhere -- TODO Which cases are talked about?
 
 sgRules :: Array Rule
 sgRules =
-  [ Rule "Masc/neuter INST -em" $ Except "Mascule -a, Neuter -í"
+  [ Rule "Masc/neuter INST -em" $ ExceptWhen "Mascule -a, Neuter -í"
   , Rule "-a => ACC -u" $ AlwaysTrue
   ]
 
-mkRuleTable :: Effect (ReactComponent { category :: Maybe Int })
+mkRuleTable :: React.Component { category :: Maybe Int }
 mkRuleTable = do
   component "RuleTable" \{ category } -> React.do
     pure $ R.ul_ $ renderRule <$> sgRules
@@ -38,7 +38,8 @@ mkRuleTable = do
             ]
 
         showException AlwaysTrue = R.text "(always applies)"
-        showException (Except except) = R.text $ "(applies except when " <> except <> ")"
+        showException (ExceptWhen except) = R.text $ "(applies except when " <> except <> ")"
+        showException (OnlyWhen except) = R.text $ "(applies only when " <> except <> ")"
 
 mkApp :: Effect (ReactComponent {})
 mkApp = do
